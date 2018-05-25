@@ -2,10 +2,11 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <locale>
+#include <QDebug>
 
-reader::reader(void* _owner)
+reader::reader(void* _sender)
 {
-    owner = _owner;
+    sender = _sender;
     callback_send_data = nullptr;
     callback_finished = nullptr;
     setlocale(LC_NUMERIC, "Russian");
@@ -17,7 +18,7 @@ bool reader::init(const char* _filepath)
     return input.is_open();
 }
 
-void reader::set_callbacks(func_send_data _send_data, func_finished _finished)
+void reader::set_callbacks(fn_send_data _send_data, fn_finished _finished)
 {
     callback_send_data = _send_data;
     callback_finished = _finished;
@@ -25,24 +26,26 @@ void reader::set_callbacks(func_send_data _send_data, func_finished _finished)
 
 void reader::start()
 {
-    set_finished(false);
+    stopped = false;
     thread_read_data = std::thread(&reader::read_data, this);
     thread_send_data = std::thread(&reader::send_data, this);
 }
 
 void reader::stop()
 {
-    set_finished(true);
-    thread_read_data.join();
-    thread_send_data.join();
+    stopped = true;
+
+    if (thread_read_data.joinable())
+        thread_read_data.join();
+
+    if (thread_send_data.joinable())
+        thread_send_data.join();
 }
 
 reader::~reader()
 {
     if (input.is_open())
-    {
         input.close();
-    }
 }
 
 void reader::read_data()
@@ -50,19 +53,15 @@ void reader::read_data()
     char* s;
     point p;
 
-    while (input.good() && !finished)
+    while (!stopped && !input.eof())
     {
         if (queue.size() > MAX_QUEUE_SIZE)
-        {
             continue;
-        }
 
         input.getline(buf, 32);
 
         if (!buf[0])
-        {
             continue;
-        }
 
         strtol(buf, &s, 10);
         p.x = strtof(s, &s);
@@ -70,28 +69,17 @@ void reader::read_data()
         queue.push(p);
     }
 
-    set_finished(true);
+    stopped = true;
+    qDebug() << "read_finished";
 }
 
 void reader::send_data()
 {
-    while (!finished || !queue.empty())
+    while (!stopped || !queue.empty())
     {
         usleep(50 * 1000);
 
-        if (queue.empty())
-        {
-            continue;
-        }
-
-        callback_send_data(owner, queue.pop());
+        if (!queue.empty())
+            callback_send_data(sender, queue.pop());
     }
-}
-
-void reader::set_finished(bool state)
-{
-    finished = state;
-
-    if (finished)
-        callback_finished();
 }

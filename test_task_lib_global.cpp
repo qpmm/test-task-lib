@@ -3,13 +3,13 @@
 
 reader* readerer = nullptr;
 
-bool global_init(void* owner, const char* filepath)
+bool reader_init(void* sender, const char* filepath)
 {
-    readerer = new reader(owner);
+    readerer = new reader(sender);
     return readerer->init(filepath);
 }
 
-void global_cleanup()
+void reader_cleanup()
 {
     if (readerer)
     {
@@ -18,17 +18,17 @@ void global_cleanup()
     }
 }
 
-void global_set_callbacks(func_send_data send_data, func_finished finished)
+void reader_set_callbacks(fn_send_data send_data, fn_finished finished)
 {
     readerer->set_callbacks(send_data, finished);
 }
 
-void global_start()
+void reader_start()
 {
     readerer->start();
 }
 
-void global_stop()
+void reader_stop()
 {
     readerer->stop();
 }

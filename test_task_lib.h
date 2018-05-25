@@ -7,32 +7,31 @@
 #include <thread>
 #include <atomic>
 
-#define MAX_QUEUE_SIZE 50
+#define MAX_QUEUE_SIZE 100
 
 class reader
 {
 public:
-    reader(void* _owner);
+    reader(void* _sender);
     ~reader();
 
     bool init(const char* _filepath);
-    void set_callbacks(func_send_data _send_data, func_finished _finished);
+    void set_callbacks(fn_send_data _send_data, fn_finished _finished);
     void start();
     void stop();
 
 private:
     void read_data();
     void send_data();
-    void set_finished(bool state);
 
     std::thread thread_read_data;
     std::thread thread_send_data;
-    func_send_data callback_send_data;
+    fn_send_data callback_send_data;
 
-    std::atomic<bool> finished;
-    func_finished callback_finished;
+    std::atomic<bool> stopped;
+    fn_finished callback_finished;
 
-    void* owner;
+    void* sender;
     std::ifstream input;
     thread_safe_queue<point> queue;
     char buf[32];

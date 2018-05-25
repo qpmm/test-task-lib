@@ -12,8 +12,7 @@ public:
 
     T pop()
     {
-        std::unique_lock<std::mutex> mlock(mutex);
-
+        std::unique_lock<std::mutex>(mutex);
         T val = queue.front();
         queue.pop();
         return val;

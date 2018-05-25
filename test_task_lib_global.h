@@ -9,19 +9,20 @@ struct point
     float y;
 };
 
-typedef void(*func_send_data)(void*, point);
-typedef void(*func_finished)();
+typedef void(*fn_send_data)(void*, point);
+typedef void(*fn_finished)();
+typedef void(*fn_set_callbacks)(fn_send_data, fn_finished);
 
-typedef bool(*func_init)(const char*, void*);
-typedef void(*func_control)();
+typedef bool(*fn_init)(void*, const char*);
+typedef void(*fn_control)();
 
 extern "C"
 {
-    bool global_init(void* owner, const char* filepath);
-    void global_cleanup();
-    void global_set_callbacks(func_send_data send_data, func_finished finished);
-    void global_start();
-    void global_stop();
+    bool reader_init(void* sender, const char* filepath);
+    void reader_cleanup();
+    void reader_set_callbacks(fn_send_data send_data, fn_finished finished);
+    void reader_start();
+    void reader_stop();
 }
 
 #endif // TEST_TASK_LIB_GLOBAL_H
