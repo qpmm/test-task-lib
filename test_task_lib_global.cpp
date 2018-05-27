@@ -18,9 +18,9 @@ void reader_cleanup()
     }
 }
 
-void reader_set_callbacks(fn_send_data send_data, fn_finished finished)
+void reader_set_callback(fn_send_data send_data)
 {
-    readerer->set_callbacks(send_data, finished);
+    readerer->set_callback(send_data);
 }
 
 void reader_start()

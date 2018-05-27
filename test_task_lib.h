@@ -16,25 +16,23 @@ public:
     ~reader();
 
     bool init(const char* _filepath);
-    void set_callbacks(fn_send_data _send_data, fn_finished _finished);
+    void set_callback(fn_send_data _send_data);
     void start();
     void stop();
 
 private:
-    void read_data();
-    void send_data();
+    void read_data(); // чтение данных из файла в очередь
+    void send_data(); // отправка данных из очереди в главное окно
 
-    std::thread thread_read_data;
-    std::thread thread_send_data;
-    fn_send_data callback_send_data;
+    std::thread thread_read_data; // поток чтения данных
+    std::thread thread_send_data; // поток отправки данных
+    fn_send_data callback_send_data; // callback отправки данных
+    std::atomic<bool> stopped; // флаг приостановки процесса
 
-    std::atomic<bool> stopped;
-    fn_finished callback_finished;
-
-    void* sender;
-    std::ifstream input;
-    thread_safe_queue<point> queue;
-    char buf[32];
+    void* sender; // объект главного окна
+    std::ifstream input; // файл исходных данных
+    thread_safe_queue<point> queue; // очередь для хранения данных
+    char buf[32]; // буфер для обработки строк файла
 };
 
 #endif // TEST_TASK_LIB_H

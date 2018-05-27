@@ -8,7 +8,6 @@ reader::reader(void* _sender)
 {
     sender = _sender;
     callback_send_data = nullptr;
-    callback_finished = nullptr;
     setlocale(LC_NUMERIC, "Russian");
 }
 
@@ -18,10 +17,9 @@ bool reader::init(const char* _filepath)
     return input.is_open();
 }
 
-void reader::set_callbacks(fn_send_data _send_data, fn_finished _finished)
+void reader::set_callback(fn_send_data _send_data)
 {
     callback_send_data = _send_data;
-    callback_finished = _finished;
 }
 
 void reader::start()
