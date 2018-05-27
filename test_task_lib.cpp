@@ -70,12 +70,11 @@ void reader::read_data()
     }
 
     stopped = true;
-    qDebug() << "read_finished";
 }
 
 void reader::send_data()
 {
-    while (!stopped || !queue.empty())
+    while (!stopped)
     {
         usleep(50 * 1000);
 
